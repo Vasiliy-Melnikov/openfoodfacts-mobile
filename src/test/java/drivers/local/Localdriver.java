@@ -1,6 +1,6 @@
-package drivers.emulation;
+package drivers.local;
 
-import config.EmulationConfig;
+import config.LocalConfig;
 import helpers.ApkInstaller;
 import io.appium.java_client.android.AndroidDriver;
 import org.aeonbits.owner.ConfigFactory;
@@ -10,26 +10,27 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 
-public class EmulatorDriver {
+public class Localdriver {
 
     public static AndroidDriver create() {
         try {
+            LocalConfig cfg = ConfigFactory.create(LocalConfig.class, System.getProperties());
 
-            EmulationConfig cfg = ConfigFactory.create(EmulationConfig.class, System.getProperties());
-            String udid = System.getProperty("udid", cfg.deviceName());
+            String udid = System.getProperty("udid");
+            if (udid == null || udid.isBlank()) udid = cfg.udid();
+
             if (cfg.reinstallApp()) {
                 ApkInstaller.reinstall(udid, cfg.appPackage(), cfg.app());
             }
 
             String launchableActivity = resolveLaunchableActivity(udid, cfg.appPackage());
             String appActivity = normalizeActivity(cfg.appActivity());
-            if (appActivity == null) {
-                appActivity = launchableActivity;
-            }
+            if (appActivity == null) appActivity = launchableActivity;
 
             MutableCapabilities caps = new MutableCapabilities();
             caps.setCapability("platformName", cfg.platformName());
             caps.setCapability("appium:automationName", cfg.automationName());
+
             caps.setCapability("appium:deviceName", cfg.deviceName());
             caps.setCapability("appium:udid", udid);
             caps.setCapability("appium:platformVersion", cfg.platformVersion());
@@ -39,6 +40,7 @@ public class EmulatorDriver {
             caps.setCapability("appium:appWaitPackage", cfg.appPackage());
             caps.setCapability("appium:appWaitActivity", "*");
             caps.setCapability("appium:appWaitDuration", 30000);
+
             caps.setCapability("appium:noReset", true);
             caps.setCapability("appium:fullReset", false);
             caps.setCapability("appium:disableWindowAnimation", true);
@@ -51,7 +53,7 @@ public class EmulatorDriver {
             return new AndroidDriver(new URL(cfg.appiumUrl()), caps);
 
         } catch (Exception e) {
-            throw new RuntimeException("Failed to create emulator driver", e);
+            throw new RuntimeException("Failed to create local Android driver", e);
         }
     }
 
@@ -104,7 +106,3 @@ public class EmulatorDriver {
         }
     }
 }
-
-
-
-

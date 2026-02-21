@@ -15,4 +15,9 @@ public class AllureAttachments {
     public static String pageSource(AppiumDriver driver) {
         return driver.getPageSource();
     }
+
+    @Attachment(value = "{name}", type = "text/plain")
+    public static String text(String name, String content) {
+        return content;
+    }
 }

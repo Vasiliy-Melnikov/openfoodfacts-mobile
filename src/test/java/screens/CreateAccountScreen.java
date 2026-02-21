@@ -3,6 +3,7 @@ package screens;
 import com.github.javafaker.Faker;
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.AppiumDriver;
+import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -14,18 +15,20 @@ public class CreateAccountScreen extends BaseScreen {
 
     private final By title = a11y("Create account");
     private final By signUpBtn = a11y("Sign Up");
+    private final By editTexts = AppiumBy.className("android.widget.EditText");
 
     private final By agreeText = a11yContains("I agree to the Open Food Facts");
+    private final By agreeRowByDesc = a11yContains("I agree");
+    private final By agreeRowByText = byTextContains("I agree");
 
     private final By agreeSwitchNearText = AppiumBy.xpath(
-            "//*[@class='android.widget.TextView' and contains(@content-desc,'I agree')]"
-                    + "/following::android.widget.Switch[1]"
+            "//*[@class='android.widget.TextView' and contains(@content-desc,'I agree')]" +
+                    "/following::android.widget.Switch[1]"
     );
 
     private final By anySwitch = AppiumBy.className("android.widget.Switch");
     private final By successDialog = a11yContains("Congratulations! Your account has just been created.");
     private final By okayBtn = a11y("Okay");
-    private final By anyEditText = AppiumBy.className("android.widget.EditText");
 
     public CreateAccountScreen(AppiumDriver driver) {
         super(driver);
@@ -35,99 +38,33 @@ public class CreateAccountScreen extends BaseScreen {
         return existsAny(Duration.ofSeconds(4), title, signUpBtn);
     }
 
+    @Step("Проверить, что открыт экран Create Account")
     public CreateAccountScreen assertShown() {
         if (!isShown()) throw new AssertionError("Create account screen not shown");
         return this;
     }
 
+    @Step("Заполнить форму регистрации")
     public void fillForm(String name, String email, String username, String password) {
-        List<WebElement> fields = waitForAtLeastEditTexts(5, Duration.ofSeconds(15));
+        List<WebElement> fields = waitOf(Duration.ofSeconds(15)).until(d -> {
+            List<WebElement> els = d.findElements(editTexts);
+            return els.size() >= 5 ? els : null;
+        });
 
-        typeInto(fields, 0, name);
-        typeInto(fields, 1, email);
-        typeInto(fields, 2, username);
-        typeInto(fields, 3, password);
-
-        fields = ensureFieldIndexAvailable(fields, 4, Duration.ofSeconds(10));
-        typeInto(fields, 4, password);
+        typeSlow(fields.get(0), name);
+        typeSlow(fields.get(1), email);
+        typeSlow(fields.get(2), username);
+        typeSlow(fields.get(3), password);
+        typeSlow(fields.get(4), password);
     }
 
-    private List<WebElement> waitForAtLeastEditTexts(int minCount, Duration timeout) {
-        long end = System.currentTimeMillis() + timeout.toMillis();
-        List<WebElement> fields = driver.findElements(anyEditText);
-
-        while (System.currentTimeMillis() < end) {
-            fields = driver.findElements(anyEditText);
-            if (fields.size() >= minCount) return fields;
-            tryScrollForwardOnce();
-            waitShort();
-        }
-
-        throw new AssertionError("Expected at least " + minCount + " EditText fields, but found " + fields.size());
-    }
-
-    private List<WebElement> ensureFieldIndexAvailable(List<WebElement> current, int index, Duration timeout) {
-        long end = System.currentTimeMillis() + timeout.toMillis();
-        List<WebElement> fields = current;
-
-        while (System.currentTimeMillis() < end) {
-            fields = driver.findElements(anyEditText);
-            if (fields.size() > index) return fields;
-
-            tryScrollForwardOnce();
-            waitShort();
-        }
-
-        throw new AssertionError("EditText with index " + index + " not found. Found only " + fields.size());
-    }
-
-    private void typeInto(List<WebElement> fields, int index, String value) {
-        if (fields.size() <= index) {
-            throw new AssertionError("Not enough EditText fields. Need index " + index + ", but size is " + fields.size());
-        }
-
-        WebElement el = fields.get(index);
-
-        try {
-            el.click();
-        } catch (Exception ignored) {}
-
-        try {
-            el.clear();
-        } catch (Exception ignored) {}
-
-        try {
-            el.sendKeys(value);
-        } catch (Exception e) {
-            List<WebElement> refreshed = driver.findElements(anyEditText);
-            if (refreshed.size() > index) {
-                try {
-                    refreshed.get(index).click();
-                } catch (Exception ignored) {}
-                refreshed.get(index).sendKeys(value);
-            } else {
-                throw e;
-            }
-        }
-
-        waitShort();
-    }
-
-    private void tryScrollForwardOnce() {
-        try {
-            driver.findElement(AppiumBy.androidUIAutomator(
-                    "new UiScrollable(new UiSelector().scrollable(true)).scrollForward()"
-            ));
-        } catch (Exception ignored) {
-        }
-    }
-
+    @Step("Принять соглашение")
     public void enableAgree() {
         scrollToTextContains("I agree");
-
         if (tapIfExists(agreeSwitchNearText, Duration.ofSeconds(2))) return;
         if (tapIfExists(agreeText, Duration.ofSeconds(2))) return;
-
+        if (tapIfExists(agreeRowByDesc, Duration.ofSeconds(2))) return;
+        if (tapIfExists(agreeRowByText, Duration.ofSeconds(2))) return;
         try {
             var switches = driver.findElements(anySwitch);
             if (!switches.isEmpty()) {
@@ -139,6 +76,7 @@ public class CreateAccountScreen extends BaseScreen {
         throw new AssertionError("Agree switch not found");
     }
 
+    @Step("Нажать Sign Up и подтвердить успех, если появится диалог")
     public void submitAndConfirmSuccessIfPresent() {
         tap(signUpBtn);
 
@@ -155,6 +93,7 @@ public class CreateAccountScreen extends BaseScreen {
         }
     }
 
+    @Step("Зарегистрировать случайный аккаунт")
     public void registerRandomAccountAndSubmit() {
         assertShown();
 

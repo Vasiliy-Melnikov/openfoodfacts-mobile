@@ -1,46 +1,55 @@
 package tests;
 
+import io.qameta.allure.*;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import screens.ProductDetailsScreen;
 import screens.components.BottomNavBar;
 
-import static io.qameta.allure.Allure.step;
+import static io.qameta.allure.SeverityLevel.*;
 
+@Epic("Mobile")
+@Feature("OpenFoodFacts")
+@Story("E2E critical flows")
 @Tag("android")
 public class OpenFoodFactsE2ETests extends TestBase {
 
     @Test
+    @Owner("Vasiliy Melnikov")
+    @Severity(CRITICAL)
+    @DisplayName("Поиск Nutella: открыть первый товар и проверить заголовок")
     void searchNutellaAndOpenFirstProduct() {
-        ProductDetailsScreen product = step("Open Search and find Nutella", () ->
+        ProductDetailsScreen product =
                 new BottomNavBar(driver)
                         .openScanTab()
                         .openSearchScreen()
-                        .searchAndOpenFirst("nutella", "Nutella")
-        );
+                        .searchAndOpenFirst("nutella", "Nutella");
 
-        step("Verify product details title contains 'Nutella'", () ->
-                product.assertOpenedWithTitleContains("Nutella")
-        );
+        product.assertOpenedWithTitleContains("Nutella");
     }
 
     @Test
+    @Owner("Vasiliy Melnikov")
+    @Severity(NORMAL)
+    @DisplayName("Навигация: переключение между вкладками Scan / Lists / Community")
     void canSwitchBetweenTabsScanCommunityLists() {
         BottomNavBar nav = new BottomNavBar(driver);
 
-        step("Open Scan tab", nav::openScanTab);
-        step("Open Lists tab", nav::openListsTab);
-        step("Open Community tab", nav::openCommunityTab);
+        nav.openScanTab();
+        nav.openListsTab();
+        nav.openCommunityTab();
     }
 
     @Test
+    @Owner("Vasiliy Melnikov")
+    @Severity(MINOR)
+    @DisplayName("Community: заполнить форму Create Account и отправить")
     void canFillCreateAccountFormAndSubmit() {
-        step("Open Create account and register random user", () ->
-                new BottomNavBar(driver)
-                        .openCommunityTab()
-                        .openCreateAccountScreen()
-                        .registerRandomAccountAndSubmit()
-        );
+        new BottomNavBar(driver)
+                .openCommunityTab()
+                .openCreateAccountScreen()
+                .registerRandomAccountAndSubmit();
     }
 }
 

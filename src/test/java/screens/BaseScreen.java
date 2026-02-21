@@ -19,6 +19,7 @@ public abstract class BaseScreen {
     protected BaseScreen(AppiumDriver driver) {
         this.driver = driver;
     }
+
     protected By a11y(String id) {
         return AppiumBy.accessibilityId(id);
     }
@@ -153,8 +154,19 @@ public abstract class BaseScreen {
                 || tapIfExists(allow1)
                 || tapIfExists(allow3)
                 || tapIfExists(byTextContains("Allow"))
-                || tapIfExists(byTextContains("Разреш"))
                 || tapIfExists(byTextContains("While using"));
+    }
+    protected List<WebElement> waitAllPresent(By locator, Duration timeout) {
+        return waitOf(timeout).until(d -> {
+            List<WebElement> els = d.findElements(locator);
+            return els.isEmpty() ? null : els;
+        });
+    }
+
+    protected void typeSlow(WebElement el, String text) {
+        el.click();
+        el.clear();
+        el.sendKeys(text);
     }
 }
 

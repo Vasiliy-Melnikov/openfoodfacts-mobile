@@ -32,8 +32,10 @@ public class ApkInstaller {
                 }
                 return Path.of(res.toURI()).toFile().getAbsolutePath();
             } catch (Exception e) {
+                throw new RuntimeException("Failed to resolve resource APK: " + path, e);
             }
         }
+
         return new File(System.getProperty("user.dir"), path).getAbsolutePath();
     }
 
@@ -76,8 +78,7 @@ public class ApkInstaller {
             }
 
             int code = p.waitFor();
-            if (!ignoreExitCode && code != 0) return code;
-            return code;
+            return ignoreExitCode ? code : code;
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to run adb command", e);

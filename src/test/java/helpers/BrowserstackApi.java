@@ -5,8 +5,6 @@ import io.qameta.allure.Allure;
 import io.restassured.RestAssured;
 import org.aeonbits.owner.ConfigFactory;
 
-import java.util.Map;
-
 import static io.restassured.RestAssured.given;
 
 public class BrowserstackApi {
@@ -14,18 +12,19 @@ public class BrowserstackApi {
     private final BrowserstackConfig cfg;
 
     public BrowserstackApi() {
-        String platform = System.getProperty("platform", "android");
-        this.cfg = ConfigFactory.create(
-                BrowserstackConfig.class,
-                System.getProperties(),
-                Map.of("platform", platform)
-        );
+        this.cfg = ConfigFactory.create(BrowserstackConfig.class, System.getProperties());
         RestAssured.baseURI = "https://api.browserstack.com";
     }
 
     public void attachVideo(String sessionId) {
+        String user = resolveUser();
+        String key = resolveKey();
+
+        if (user.isBlank() || key.isBlank()) return;
+        if (sessionId == null || sessionId.isBlank()) return;
+
         String videoUrl = given()
-                .auth().preemptive().basic(getUser(), getKey())
+                .auth().preemptive().basic(user, key)
                 .when()
                 .get("/app-automate/sessions/" + sessionId + ".json")
                 .then()
@@ -39,17 +38,19 @@ public class BrowserstackApi {
         }
     }
 
-    private String getUser() {
-        String u = cfg.user();
-        if (u == null || u.isBlank()) u = System.getenv("BROWSERSTACK_USERNAME");
-        if (u == null || u.isBlank()) u = System.getenv("BROWSERSTACK_USER");
-        return u;
+    private String resolveUser() {
+        if (cfg.user() != null && !cfg.user().isBlank()) return cfg.user();
+        String u = System.getenv("BROWSERSTACK_USERNAME");
+        if (u != null && !u.isBlank()) return u;
+        u = System.getenv("BROWSERSTACK_USER");
+        return u == null ? "" : u;
     }
 
-    private String getKey() {
-        String k = cfg.key();
-        if (k == null || k.isBlank()) k = System.getenv("BROWSERSTACK_ACCESS_KEY");
-        if (k == null || k.isBlank()) k = System.getenv("BROWSERSTACK_KEY");
-        return k;
+    private String resolveKey() {
+        if (cfg.key() != null && !cfg.key().isBlank()) return cfg.key();
+        String k = System.getenv("BROWSERSTACK_ACCESS_KEY");
+        if (k != null && !k.isBlank()) return k;
+        k = System.getenv("BROWSERSTACK_KEY");
+        return k == null ? "" : k;
     }
 }

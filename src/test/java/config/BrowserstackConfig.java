@@ -22,6 +22,7 @@ public interface BrowserstackConfig extends Config {
     String url();
 
     @Key("bs.app")
+    @DefaultValue("")
     String app();
 
     @Key("bs.project")

@@ -4,9 +4,10 @@ import org.aeonbits.owner.Config;
 
 @Config.LoadPolicy(Config.LoadType.MERGE)
 @Config.Sources({
-        "classpath:config/emulation.properties"
+        "system:properties",
+        "classpath:config/local.properties"
 })
-public interface EmulationConfig extends Config {
+public interface LocalConfig extends Config {
 
     @Key("appium.url")
     @DefaultValue("http://127.0.0.1:4723/wd/hub")
@@ -31,6 +32,10 @@ public interface EmulationConfig extends Config {
     @Key("appActivity")
     @DefaultValue("")
     String appActivity();
+
+    @Key("udid")
+    @DefaultValue("emulator-5554")
+    String udid();
 
     @Key("deviceName")
     @DefaultValue("emulator-5554")
