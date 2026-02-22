@@ -12,12 +12,19 @@ import java.util.List;
 
 public class SearchProductsScreen extends BaseScreen {
     private static final Duration SCREEN_MARKER_TIMEOUT = Duration.ofSeconds(3);
-    private static final Duration SCREEN_OPEN_TIMEOUT = Duration.ofSeconds(20);
+    private static final Duration SCREEN_OPEN_TIMEOUT = Duration.ofSeconds(25);
     private static final Duration RESULTS_WAIT_TIMEOUT = Duration.ofMinutes(2);
 
+    private Duration resultsLoadTimeout() {
+        return isBrowserStack() ? Duration.ofMinutes(2) : Duration.ofSeconds(60);
+    }
     private final By markerSearchAProduct = a11yContains("Search a product");
     private final By markerSearch = a11yContains("Search");
-    private final By editText = AppiumBy.className("android.widget.EditText");
+
+    private final By searchInput = AppiumBy.xpath(
+            "//*[@class='android.widget.EditText' and contains(@content-desc,'Search a product')]"
+    );
+    private final By anyEditText = AppiumBy.className("android.widget.EditText");
 
     private final By anyClickableResultCard = AppiumBy.androidUIAutomator(
             "new UiSelector().descriptionContains(\"%\").clickable(true)"
@@ -30,7 +37,8 @@ public class SearchProductsScreen extends BaseScreen {
     public boolean isShown() {
         return exists(markerSearchAProduct, SCREEN_MARKER_TIMEOUT)
                 || exists(markerSearch, SCREEN_MARKER_TIMEOUT)
-                || exists(editText, SCREEN_MARKER_TIMEOUT);
+                || exists(searchInput, SCREEN_MARKER_TIMEOUT)
+                || exists(anyEditText, SCREEN_MARKER_TIMEOUT);
     }
 
     public SearchProductsScreen waitShown(Duration timeout) {
@@ -51,18 +59,33 @@ public class SearchProductsScreen extends BaseScreen {
     @Step("Выполнить поиск: {query}")
     public void search(String query) {
         waitShown(SCREEN_OPEN_TIMEOUT);
-        try {
-            WebElement active = driver.switchTo().activeElement();
-            active.click();
-            active.clear();
-            active.sendKeys(query);
-        } catch (Exception e) {
-            tap(editText);
-            typeSlow(editText, query);
+        tapIfExists(markerSearchAProduct, Duration.ofSeconds(3));
+        tapIfExists(markerSearch, Duration.ofSeconds(2));
+        if (exists(searchInput, Duration.ofSeconds(15))) {
+            typeSlow(searchInput, query);
+        } else if (exists(anyEditText, Duration.ofSeconds(15))) {
+            typeSlow(anyEditText, query);
+        } else {
+            throw new AssertionError("Search input not found on SearchProducts screen");
         }
 
         pressEnter();
+
+        waitResultsLoaded(resultsLoadTimeout());
     }
+    public void waitResultsLoaded(Duration timeout) {
+        long end = System.currentTimeMillis() + timeout.toMillis();
+
+        while (System.currentTimeMillis() < end) {
+            new OnboardingFlow(driver).passIfPresent();
+            if (!driver.findElements(anyClickableResultCard).isEmpty()) return;
+
+            sleep(400);
+        }
+
+        throw new AssertionError("Search results not loaded within " + timeout.toSeconds() + "s");
+    }
+
 
     @Step("Открыть первый результат (ожидаем часть названия: {namePart})")
     public void openFirstResultContaining(String namePart) {

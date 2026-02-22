@@ -23,6 +23,7 @@ public abstract class BaseScreen {
     protected By a11y(String id) {
         return AppiumBy.accessibilityId(id);
     }
+
     protected By a11yContains(String part) {
         return AppiumBy.androidUIAutomator(
                 "new UiSelector().descriptionContains(\"" + part.replace("\"", "\\\"") + "\")"
@@ -40,20 +41,22 @@ public abstract class BaseScreen {
                 "new UiSelector().textContains(\"" + text.replace("\"", "\\\"") + "\")"
         );
     }
+
     protected By byHint(String hint) {
         return AppiumBy.xpath("//*[@class='android.widget.EditText' and @hint='" + hint + "']");
     }
 
-    protected boolean scrollToTextContains(String text) {
-        try {
-            driver.findElement(AppiumBy.androidUIAutomator(
-                    "new UiScrollable(new UiSelector().scrollable(true))" +
-                            ".scrollIntoView(new UiSelector().textContains(\"" + text.replace("\"", "\\\"") + "\"))"
-            ));
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+    protected boolean isBrowserStack() {
+        String host = System.getProperty("deviceHost", "local");
+        return host != null && host.trim().equalsIgnoreCase("browserstack");
+    }
+
+    protected Duration defaultUiTimeout() {
+        return isBrowserStack() ? Duration.ofSeconds(25) : Duration.ofSeconds(10);
+    }
+
+    protected Duration shortExistsTimeout() {
+        return Duration.ofMillis(300);
     }
 
     protected FluentWait<AppiumDriver> waitOf(Duration timeout) {
@@ -93,8 +96,12 @@ public abstract class BaseScreen {
         return waitOf(timeout).until(ExpectedConditions.visibilityOfElementLocated(locator));
     }
 
+    protected WebElement waitVisible(By locator) {
+        return waitVisible(locator, defaultUiTimeout());
+    }
+
     protected void click(By locator) {
-        waitVisible(locator, Duration.ofSeconds(10)).click();
+        waitVisible(locator, defaultUiTimeout()).click();
     }
 
     protected boolean clickIfExists(By locator) {
@@ -114,11 +121,19 @@ public abstract class BaseScreen {
     }
 
     protected void tap(By locator) { click(locator); }
+
     protected boolean tapIfExists(By locator) { return clickIfExists(locator); }
+
     protected boolean tapIfExists(By locator, Duration timeout) { return clickIfExists(locator, timeout); }
 
     protected void typeSlow(By locator, String text) {
-        WebElement el = waitVisible(locator, Duration.ofSeconds(10));
+        WebElement el = waitVisible(locator, defaultUiTimeout());
+        el.click();
+        el.clear();
+        el.sendKeys(text);
+    }
+
+    protected void typeSlow(WebElement el, String text) {
         el.click();
         el.clear();
         el.sendKeys(text);
@@ -135,6 +150,18 @@ public abstract class BaseScreen {
         try {
             driver.switchTo().activeElement().sendKeys(Keys.ENTER);
         } catch (Exception ignored) {}
+    }
+
+    protected boolean scrollToTextContains(String text) {
+        try {
+            driver.findElement(AppiumBy.androidUIAutomator(
+                    "new UiScrollable(new UiSelector().scrollable(true))" +
+                            ".scrollIntoView(new UiSelector().textContains(\"" + text.replace("\"", "\\\"") + "\"))"
+            ));
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     protected void waitShort() {
@@ -156,26 +183,14 @@ public abstract class BaseScreen {
                 || tapIfExists(byTextContains("Allow"))
                 || tapIfExists(byTextContains("While using"));
     }
+
     protected List<WebElement> waitAllPresent(By locator, Duration timeout) {
         return waitOf(timeout).until(d -> {
             List<WebElement> els = d.findElements(locator);
             return els.isEmpty() ? null : els;
         });
     }
-
-    protected void typeSlow(WebElement el, String text) {
-        el.click();
-        el.clear();
-        el.sendKeys(text);
-    }
 }
-
-
-
-
-
-
-
 
 
 

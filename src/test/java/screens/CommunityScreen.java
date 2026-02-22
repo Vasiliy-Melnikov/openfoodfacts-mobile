@@ -12,13 +12,19 @@ public class CommunityScreen extends BaseScreen {
     private final By loggedOut = a11y("Logged out");
     private final By createAccount = a11y("Create account");
 
+    private final By latestNews = a11yContains("Latest news");
+    private final By helpUsInform = a11yContains("Help us inform");
+    private final By contribute = a11yContains("Contribute");
+
     public CommunityScreen(AppiumDriver driver) {
         super(driver);
     }
 
     public boolean isShown() {
-        return exists(createAccount, Duration.ofSeconds(2))
-                || exists(loggedOut, Duration.ofSeconds(2));
+        return existsAny(Duration.ofSeconds(2),
+                latestNews, helpUsInform, contribute,
+                createAccount, loggedOut
+        );
     }
 
     public CommunityScreen waitShown(Duration timeout) {
@@ -33,7 +39,7 @@ public class CommunityScreen extends BaseScreen {
 
     @Step("Проверить, что открыт экран Community")
     public CommunityScreen assertShown() {
-        return waitShown(Duration.ofSeconds(10));
+        return waitShown(isBrowserStack() ? Duration.ofSeconds(30) : Duration.ofSeconds(15));
     }
 
     @Step("Открыть форму создания аккаунта")
@@ -45,7 +51,7 @@ public class CommunityScreen extends BaseScreen {
 
     @Step("Перейти на экран Create Account")
     public CreateAccountScreen openCreateAccountScreen() {
-        waitShown(Duration.ofSeconds(15));
+        waitShown(isBrowserStack() ? Duration.ofSeconds(40) : Duration.ofSeconds(20));
         openCreateAccount();
         return new CreateAccountScreen(driver).assertShown();
     }

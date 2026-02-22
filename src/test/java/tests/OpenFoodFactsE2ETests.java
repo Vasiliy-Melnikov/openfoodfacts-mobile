@@ -43,7 +43,7 @@ public class OpenFoodFactsE2ETests extends TestBase {
 
     @Test
     @Owner("Vasiliy Melnikov")
-    @Severity(MINOR)
+    @Severity(CRITICAL)
     @DisplayName("Community: заполнить форму Create Account и отправить")
     void canFillCreateAccountFormAndSubmit() {
         new BottomNavBar(driver)
