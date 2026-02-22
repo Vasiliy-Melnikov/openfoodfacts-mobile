@@ -14,7 +14,6 @@ public class SystemPermissionDialog extends BaseScreen {
     private static final By ALLOW_3 = AppiumBy.id("com.android.packageinstaller:id/permission_allow_button");
 
     private static final By ALLOW_TXT = AppiumBy.androidUIAutomator("new UiSelector().textContains(\"Allow\")");
-    private static final By ALLOW_RU  = AppiumBy.androidUIAutomator("new UiSelector().textContains(\"Разреш\")");
     private static final By WHILE_USING = AppiumBy.androidUIAutomator("new UiSelector().textContains(\"While using\")");
 
     public SystemPermissionDialog(AppiumDriver driver) {
@@ -30,8 +29,7 @@ public class SystemPermissionDialog extends BaseScreen {
                             tapIfExists(ALLOW_1, Duration.ofMillis(300)) ||
                             tapIfExists(ALLOW_3, Duration.ofMillis(300)) ||
                             tapIfExists(WHILE_USING, Duration.ofMillis(300)) ||
-                            tapIfExists(ALLOW_TXT, Duration.ofMillis(300)) ||
-                            tapIfExists(ALLOW_RU, Duration.ofMillis(300));
+                            tapIfExists(ALLOW_TXT, Duration.ofMillis(300));
 
             if (!clicked) return;
 

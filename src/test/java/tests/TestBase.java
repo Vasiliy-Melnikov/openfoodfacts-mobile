@@ -1,5 +1,6 @@
 package tests;
 
+import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import helpers.AllureAttachments;
 import helpers.BrowserstackApi;
@@ -21,6 +22,12 @@ public class TestBase {
         String hostRaw = System.getProperty("deviceHost");
         String host = (hostRaw == null || hostRaw.isBlank()) ? "local" : hostRaw.toLowerCase();
         return host.equals("browserstack");
+    }
+
+    @BeforeAll
+    static void setup() {
+        Configuration.timeout = 30000;
+        Configuration.browserSize = null;
     }
 
     @BeforeEach
