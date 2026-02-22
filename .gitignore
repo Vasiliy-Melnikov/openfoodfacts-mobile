@@ -111,4 +111,3 @@ allure-report
 *.aab
 *.ipa
 /build/
-/app/build/

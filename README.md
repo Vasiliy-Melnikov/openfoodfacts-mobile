@@ -265,6 +265,12 @@ export BROWSERSTACK_KEY='YOUR_KEY'
 ---
 ## 🖥 Локальный запуск (Appium)
 
+Загрузка приложения:
+
+Так как github имеет ограничение на загрузку файлов в 200 мб приложение можно скачать здесь https://cloud.mail.ru/public/AGJ9/9z1SamXqZ
+
+Приложение положить по пути: openfoodfacts-mobile-tests\src\test\resources\apps
+
 ```bash
 .\gradlew clean test 
 -DdeviceHost=local 
