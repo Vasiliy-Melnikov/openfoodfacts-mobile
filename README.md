@@ -10,8 +10,7 @@
 🔹 Open-source проект: https://world.openfoodfacts.org  
 🔹 GitHub: https://github.com/openfoodfacts
 
-Проект выполнен в демонстрационных и учебных целях
-(построение портфолио QA Automation Engineer).
+
 ---
 
 ## 🎯 Особенности проекта
