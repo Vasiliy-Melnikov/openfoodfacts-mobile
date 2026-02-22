@@ -49,7 +49,7 @@
   <a href="https://www.java.com/"><img width="6%" title="Java" src="images/Java.svg"></a>
   <a href="https://junit.org/junit5/"><img width="6%" title="JUnit5" src="images/JUnit5.svg"></a>
   <a href="https://gradle.org/"><img width="6%" title="Gradle" src="images/Gradle.svg"></a>
-  <a href="https://appium.io/docs/en/latest/"><img width="6%" title="Appium" src="images/appium.svg">
+  <a href="https://appium.io/docs/en/latest/"><img width="6%" title="Appium" src="images/appium.png">
   <a href="https://www.browserstack.com/"><img width="6%" title="BrowserStack" src="images/browserstack.svg">
   <a href="https://github.com/allure-framework/allure2"><img width="6%" title="Allure Report" src="images/Allure_Report.svg"></a>
   <a href="https://www.jenkins.io/"><img width="6%" title="Jenkins" src="images/Jenkins.svg"></a>
@@ -265,11 +265,9 @@ export BROWSERSTACK_KEY='YOUR_KEY'
 ---
 ## 🖥 Локальный запуск (Appium)
 
-Загрузка приложения:
+Приложение можно скачать здесь https://cloud.mail.ru/public/AGJ9/9z1SamXqZ
 
-Так как github имеет ограничение на загрузку файлов в 200 мб приложение можно скачать здесь https://cloud.mail.ru/public/AGJ9/9z1SamXqZ
-
-Приложение положить по пути: openfoodfacts-mobile-tests\src\test\resources\apps
+Приложение положить в apps: openfoodfacts-mobile-tests\src\test\resources\apps
 
 ```bash
 .\gradlew clean test 
