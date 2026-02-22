@@ -271,7 +271,7 @@ export BROWSERSTACK_KEY='YOUR_KEY'
 ```bash
 .\gradlew clean test 
 -DdeviceHost=local 
--Dudid=8d36d42b
+-Dudid=YOUR_device
 ```
 ---
 После выполнения тестов формируются результаты:
